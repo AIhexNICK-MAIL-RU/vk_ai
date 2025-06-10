@@ -33,10 +33,28 @@ DEMO_RECOMMENDATIONS = [
     }
 ]
 
+@app.route('/')
+def index():
+    return jsonify({
+        'status': 'running',
+        'message': 'Art recommendation demo service',
+        'endpoints': {
+            '/health': 'GET - Health check',
+            '/api/similar': 'POST - Get similar artworks (demo mode)',
+            '/api/recommendations': 'GET - Get demo recommendations'
+        }
+    })
+
 @app.route('/api/similar', methods=['POST'])
 def find_similar_artworks():
     return jsonify({
         'similar_artworks': DEMO_RECOMMENDATIONS
+    })
+
+@app.route('/api/recommendations', methods=['GET'])
+def get_recommendations():
+    return jsonify({
+        'recommendations': DEMO_RECOMMENDATIONS
     })
 
 @app.route('/health', methods=['GET'])
@@ -47,5 +65,5 @@ def health_check():
     })
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port) 
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port, debug=True) 

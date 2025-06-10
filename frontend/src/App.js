@@ -14,6 +14,8 @@ import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const VisuallyHiddenInput = styled('input')`
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
@@ -43,7 +45,7 @@ function App() {
       formData.append('image', file);
 
       try {
-        const response = await axios.post('http://localhost:5000/api/similar', formData, {
+        const response = await axios.post(`${API_URL}/api/similar`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -128,7 +130,7 @@ function App() {
                         {artwork.artist}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {artwork.date}
+                        {artwork.year}
                       </Typography>
                     </CardContent>
                   </Card>
