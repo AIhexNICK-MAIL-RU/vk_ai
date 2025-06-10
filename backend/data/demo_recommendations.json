@@ -1,0 +1,44 @@
+{
+    "default_recommendations": [
+        {
+            "id": 1,
+            "title": "The Starry Night",
+            "artist": "Vincent van Gogh",
+            "year": 1889,
+            "image_url": "https://images.metmuseum.org/CRDImages/ep/original/DP-974-001.jpg",
+            "description": "One of Van Gogh's most famous works, painted while he was staying in the Saint-Paul-de-Mausole asylum in Saint-Rémy-de-Provence, France."
+        },
+        {
+            "id": 2,
+            "title": "Water Lilies",
+            "artist": "Claude Monet",
+            "year": 1919,
+            "image_url": "https://images.metmuseum.org/CRDImages/ep/original/DP-1506-001.jpg",
+            "description": "Part of Monet's Water Lilies series, painted in his garden at Giverny."
+        },
+        {
+            "id": 3,
+            "title": "The Persistence of Memory",
+            "artist": "Salvador Dalí",
+            "year": 1931,
+            "image_url": "https://www.moma.org/media/W1siZiIsIjM4NjQ3MCJdLFsicCIsImNvbnZlcnQiLCItcXVhbGl0eSA5MCAtcmVzaXplIDIwMDB4MjAwMFx1MDAzZSJdXQ.jpg?sha=4c0635a9ee70d63e",
+            "description": "One of Dalí's most recognizable works, featuring the iconic melting clocks."
+        },
+        {
+            "id": 4,
+            "title": "The Kiss",
+            "artist": "Gustav Klimt",
+            "year": 1908,
+            "image_url": "https://www.belvedere.at/sites/default/files/jart-images/KLIMT_Der_Kuss.jpg",
+            "description": "A masterpiece of the Art Nouveau period, depicting two lovers embracing."
+        },
+        {
+            "id": 5,
+            "title": "Girl with a Pearl Earring",
+            "artist": "Johannes Vermeer",
+            "year": 1665,
+            "image_url": "https://www.mauritshuis.nl/media/2640/670-girl-with-a-pearl-earring.jpg",
+            "description": "One of Vermeer's most famous works, often referred to as the 'Mona Lisa of the North'."
+        }
+    ]
+} 
