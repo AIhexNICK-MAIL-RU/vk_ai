@@ -13,15 +13,19 @@ services:
         value: 8000
 
   # Frontend React service
-  - type: static
+  - type: web
     name: art-recommender-frontend
+    env: node
+    region: frankfurt
     buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/build
+    startCommand: cd frontend && npx serve -s build -l $PORT
     envVars:
       - key: NODE_VERSION
         value: 18.0.0
       - key: REACT_APP_API_URL
         value: https://art-recommender-api.onrender.com
+      - key: PORT
+        value: 10000
     headers:
       - path: /*
         name: Cache-Control
