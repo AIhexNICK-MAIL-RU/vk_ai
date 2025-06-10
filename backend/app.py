@@ -9,67 +9,68 @@ import numpy as np
 import os
 import json
 import gc
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app)
 
-# Global variables for models and index
-clip_model = None
-processor = None
+# Global variables for index and metadata
 faiss_index = None
 artwork_metadata = {}
 
-def load_models():
-    global clip_model, processor, faiss_index
+def load_faiss_and_metadata():
+    global faiss_index, artwork_metadata
     
-    try:
-        # Load CLIP model and processor with lower precision
-        model_name = "openai/clip-vit-tiny-patch32"  # Using tiny model instead of base
-        clip_model = CLIPModel.from_pretrained(model_name, torch_dtype=torch.float16)
-        processor = CLIPProcessor.from_pretrained(model_name)
+    # Load FAISS index if exists
+    if os.path.exists('data/artworks.index'):
+        faiss_index = faiss.read_index('data/artworks.index')
         
-        # Move model to CPU and clear CUDA cache
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
-        # Load FAISS index if exists
-        if os.path.exists('data/artworks.index'):
-            faiss_index = faiss.read_index('data/artworks.index')
-            
-            # Load artwork metadata
-            if os.path.exists('data/artwork_metadata.json'):
-                with open('data/artwork_metadata.json', 'r') as f:
-                    global artwork_metadata
-                    artwork_metadata = json.load(f)
-        
-        # Force garbage collection
-        gc.collect()
-        
-    except Exception as e:
-        print(f"Error loading models: {str(e)}")
-        raise
+        # Load artwork metadata
+        if os.path.exists('data/artwork_metadata.json'):
+            with open('data/artwork_metadata.json', 'r') as f:
+                artwork_metadata = json.load(f)
 
-def get_image_embedding(image):
-    try:
-        # Process image and get embeddings using CLIP
-        inputs = processor(images=image, return_tensors="pt", padding=True)
-        with torch.no_grad():  # Disable gradient calculation
-            image_features = clip_model.get_image_features(**inputs)
-        # Normalize the features
-        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-        
-        # Convert to numpy and clear memory
-        result = image_features.cpu().detach().numpy()
-        del image_features
-        del inputs
-        torch.cuda.empty_cache() if torch.cuda.is_available() else None
-        gc.collect()
-        
-        return result
-        
-    except Exception as e:
-        print(f"Error in get_image_embedding: {str(e)}")
-        raise
+class ModelManager:
+    def __init__(self):
+        self.model = None
+        self.processor = None
+    
+    def load_model(self):
+        if self.model is None:
+            model_name = "openai/clip-vit-tiny-patch32"
+            self.model = CLIPModel.from_pretrained(model_name, torch_dtype=torch.float16)
+            self.processor = CLIPProcessor.from_pretrained(model_name)
+    
+    def unload_model(self):
+        if self.model is not None:
+            del self.model
+            del self.processor
+            self.model = None
+            self.processor = None
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            gc.collect()
+    
+    def get_embedding(self, image):
+        self.load_model()
+        try:
+            inputs = self.processor(images=image, return_tensors="pt", padding=True)
+            with torch.no_grad():
+                image_features = self.model.get_image_features(**inputs)
+            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+            result = image_features.cpu().detach().numpy()
+            
+            # Clean up
+            del inputs
+            del image_features
+            self.unload_model()
+            
+            return result
+        except Exception as e:
+            self.unload_model()
+            raise e
+
+model_manager = ModelManager()
 
 @app.route('/api/similar', methods=['POST'])
 def find_similar_artworks():
@@ -82,7 +83,7 @@ def find_similar_artworks():
         image = Image.open(io.BytesIO(image_file.read())).convert('RGB')
         
         # Get embedding for the uploaded image
-        embedding = get_image_embedding(image)
+        embedding = model_manager.get_embedding(image)
         
         # Search similar artworks
         k = 5  # number of similar artworks to return
@@ -94,7 +95,7 @@ def find_similar_artworks():
             if str(idx) in artwork_metadata:
                 similar_artworks.append(artwork_metadata[str(idx)])
         
-        # Clear memory
+        # Clean up
         del embedding
         gc.collect()
         
@@ -105,8 +106,8 @@ def find_similar_artworks():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Load models when the application starts
-load_models()
+# Load FAISS index and metadata at startup
+load_faiss_and_metadata()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
