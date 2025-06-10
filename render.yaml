@@ -15,10 +15,8 @@ services:
   # Frontend React service
   - type: static
     name: art-recommender-frontend
-    env: static
     buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/build
-    pullRequestPreviewsEnabled: true
+    staticPublishPath: frontend/build
     envVars:
       - key: NODE_VERSION
         value: 18.0.0
