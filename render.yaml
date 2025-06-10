@@ -13,18 +13,19 @@ services:
         value: 8000
 
   # Frontend React service
-  - type: web
+  - type: static
     name: art-recommender-frontend
-    env: node
-    region: frankfurt
-    buildCommand: |
-      cd frontend
-      npm install
-      npm run build
-    startCommand: |
-      cd frontend
-      npm install -g serve
-      serve -s build -l $PORT
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: 18.0.0
