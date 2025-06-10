@@ -74,9 +74,8 @@ def find_similar_artworks():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.before_first_request
-def initialize():
-    load_models()
+# Load models when the application starts
+load_models()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) 
